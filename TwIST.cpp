@@ -12,16 +12,18 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
     int iter=0;
     int final_stopCriterion=4;
     const unsigned Initial_X_supplied=80;
-    int stopCriterion = 3;
+    
+    
+    int stopCriterion = 1;
     double tolA = 0.01;
-    double tolD = 0.0001;
-    bool debias = false;
+    bool debias = 0;
     int maxiter = 10000;
-    int maxiter_debias = 500;
+    int maxiter_debias = 200;
     int miniter = 5;
     int miniter_debias = 5;
     int init = 0;
-    int sizetotal=0;
+
+    
     int enforceMonotone = 1;
     double alphamin = 1e-30;
     double alphamax = 1e30;
@@ -35,6 +37,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
     double prev_f=0.0,dd=0.0,num_changes_active=0.0,criterionLCP=0.0;
     char *str=0;
     int i;
+    
 
     va_list args;
     va_start(args, arguments);
