@@ -13,7 +13,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <time.h>
+#include <time.h>		/* time */
+#include <stdlib.h>		/*srand, rand*/
 
 using namespace std;
 
@@ -25,48 +26,59 @@ typedef struct Result{
 }twist;
 
 typedef struct Matrix{ 
-    double *matrixA;
+    float **matrixA;
     size_t m;
     size_t n;
-}matriz;
-
-
-
-
+}matriz_A;
 
 /*Función principal: 
 Recibe un vector de medidas de una imagen hiperespectral
 */
 int main()
 {
-
     twist *result = new twist;
-    size_t shots = 1;
-    size_t coded = 0;
-    size_t count = 0;
     int tmy = 1024;
-    int tm = 4096;
+    int tm = 256;*/
     static float *y2= new float[tmy];
-    matriz *R = new matriz;
+    
+    matriz_A *R = new matriz_A;
     R ->m = ROWS;
-    R ->n = COL;
+    R ->n = COLS;     
     
+    size_t i,j;
     
-    //Carga de las medidas
+    //Crear Matrix R
+	R->matrixA = new float*[R->m];
+	srand((unsigned)time(0));
+    for (i = 0; i < COLS; i++) 
+    {
+		R->matrixA[i] = new float[R ->n];
+		for (j = 0; j < ROWS ; j++)
+		{
+			R->matrixA[i][j]= rand()%2;
+
+		}
+	}
+    
+    //Carga de medidas observadas
     ifstream myfile;
     myfile.open ("medidas_y_p1.txt");
     float output;
-    int t1,t2,t3;
-
-    if (myfile.is_open()){
-        for (int i=0; i < tmy ; i++) {
+    if (myfile.is_open())
+    {
+        for (i=0; i < tmy ; i++) 
+        {
 			myfile >> output;
 			y2[i] = output;
 			//printf("This is the line = %10.3f\n", output);
         }
     }
-
     myfile.close();
+    
+    
+    //Parámetros
+    /*int tau = 20;
+	float tolA = 0.01;*/
       
     //Llamada al algoritmo de reconstrucción
     //TwiST(y2,obj,tau,reconstruction,6,"TOLERANCEA",1e-12,"MAXITERA",MAXITERA,"VERBOSE",1,"FIN");

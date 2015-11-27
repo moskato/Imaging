@@ -179,22 +179,23 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 	/*Implementar las funciones  
 	 * A(x) = R*x
 	 * AT(x) = R'*x
-	 * Psi = hard(x,th) ***Nop
-	 * Phi = L0norm     ***Nop
+	 * Psi = hard(x,th) 
+	 * Phi = L0norm     
 	 * Nonzero --> Extract the valuez nonzero in a vector
 	 * sumVector -> Sum the values in a vector
+	 * 
 	 * */
 	 
 	 //Define the indicator vector or matrix of nonzeros in x
 	 
-	Nonzero(x,tm,nz_x); //Extract the valuez nonzero in a vector
+	nz_x = NonZero(x,tm); //Extract the valuez nonzero in a vector
 	num_nz_x = sumVector(nz_x,tm); //Sum the values in a vector
 	 
 	// Compute and store initial value of the objective function
 	
 	temp = A(x);
-	resid = minusAB(y, temp, tmy);
-	prev_f = 0.5 * (prod(resid,resid,tmy)) + tau*phi_function(x,tm);
+	resid = vector_minus(y, temp, tmy);
+	prev_f = 0.5 * (vector_prod(resid,resid,tmy)) + tau*phi_function(x,tm);
 	//prev_f = 0.5*(resid'*resid) + tau*phi_function(x);
 	
 	
@@ -241,16 +242,16 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 				temp1 = prod_c_V(xm1,(alpha-beta));
 				temp2 = prod_c_V(xm2,(1-alpha));
 				temp3 = prod_c_V(x,beta);
-				xm2 = sumAB(temp1,temp2, tmy);
-				xm2 = sumAB(xm2,temp3, tmy);
+				xm2 = vector_sum(temp1,temp2, tmy);
+				xm2 = vector_sum(xm2,temp3, tmy);
             
 				// compute residual
 				temp4 = A(xm2)
-				resid = minusAB(y, temp4, tmy);
+				resid = vector_minus(y, temp4, tmy);
 				resid = y - A(x);
 				
 				//f = 0.5*(resid(:)'*resid(:)) + tau*phi_function(xm2);
-				f = 0.5 * (prod(resid,resid,tmy)) + tau*phi_function(xm2,tmy);
+				f = 0.5 * (vector_prod(resid,resid,tmy)) + tau*phi_function(xm2,tmy);
 				
 				
 				if (f > prev_f) && (enforceMonotone)
@@ -273,10 +274,10 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 			{
 				//resid = y-A(x);
 				temp4 = A(x)
-				resid = minusAB(y, temp4, tmy);
+				resid = vector_minus(y, temp4, tmy);
 				
 				//f = 0.5*(resid(:)'*resid(:)) + tau*phi_function(x);
-				f = 0.5 * (prod(resid,resid,tmy)) + tau*phi_function(x, x.size());
+				f = 0.5 * (vector_prod(resid,resid,tmy)) + tau*phi_function(x, x.size());
 				if (f > prev_f)
 				{
 					/* if monotonicity  fails here  is  because
@@ -298,10 +299,10 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
     xm1 = x;        
             
     //update the number of nonzero components and its variation
-    nz_x_prev = nz_x;
+    /*nz_x_prev = nz_x;
     nz_x = (x~=0.0);
-    num_nz_x = sum(nz_x(:));
-    num_changes_active = (sum(nz_x(:)~=nz_x_prev(:)));
+    num_nz_x = sumVector(nz_x(:));
+    num_change|s_active = (sum(nz_x(:)~=nz_x_prev(:)));*/
 
     // take no less than miniter and no more than maxiter iterations
     switch (stopCriterion)
