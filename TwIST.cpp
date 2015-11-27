@@ -1,16 +1,7 @@
 void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
+	
+	int tm = 1024; //Static size for example :D
 
-    /*int tmy = A->shots*A->apertures[0].m*(A->apertures[0].n+(A->l-1));
-    int tm = A->apertures[0].n*A->apertures[0].m*A->l;
-    double f=1.0,tol_debias=0.001,num_nz_x=2.0,alpha=1.0;
-    bool cont_debias_cg=true,keep_going;
-    static double *RWpvec=0;
-    double beta_cg=0.0,alpha_cg=0.0,rTr_cg_plus=0.0,rTr_cg=0.0,final_tau=0.0;
-    double final_tolA=0.0001;
-    double tmp;*/
-    
-    int tm = A->apertures[0].n*A->apertures[0].m*A->l;
-    //clock_t t0;
     int stopCriterion = 1;
     double tolA = 0.01;
     bool debias = false;
@@ -28,7 +19,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
     
     int sparse = 1;
     double tolD = 0.001
-    //variable phi_l1 and psi_ok type?
+    //variable phi_l1 and psi_ok 
     double phi_l1 = 0;
     double psi_ok = 0;
     //Default eigenvalues
@@ -147,4 +138,42 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
     {
         beta  = (alpha*2)/(lam1+lamN);
     }
+
+    
+    switch(init)
+    {
+    case 0: 
+    {
+        x = new float[tm];
+
+        for(i=0;i<tm;i++){
+            x[i]=0.0;
+        }
+        break;
+    };
+    default: cout<<"Unknown Initialization option"<<endl;break;
+	}
+    
+    
+    float max_tau;
+    max_tau = 0.0;
+
+	/*Implementar las funciones  
+	 * A(x) = R*x
+	 * AT(x) = R'*x
+	 * Psi = hard(x,th) ***Nop
+	 * Phi = L0norm     ***Nop
+	 * Nonzero --> Extract the valuez nonzero in a vector
+	 * sumVector -> Sum the values in a vector
+	 * */
+	 
+	 //Define the indicator vector or matrix of nonzeros in x
+	 
+	Nonzero(x,tm,nz_x); //Extract the valuez nonzero in a vector
+	num_nz_x = sumVector(nz_x,tm); //Sum the values in a vector
+	 
+	// Compute and store initial value of the objective function
+	
+	resid = y - A(x);
+	
 }
