@@ -186,6 +186,8 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 	 * 
 	 * */
 	 
+	/*
+	
 	 //Define the indicator vector or matrix of nonzeros in x
 	 
 	nz_x = NonZero(x,tm); //Extract the valuez nonzero in a vector
@@ -344,6 +346,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
     prev_f = f;
     objective(iter) = f;
     times(iter) = cputime - t0;
-}
+	}
     
 }
+	}
