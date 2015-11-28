@@ -1,6 +1,6 @@
 /*!
  * Función vector_res:
- * calcula la resta de dos vectores.
+ * Calcula la resta de dos vectores.
  * 
  * @param x puntero a vector de entrada.
  * @param y puntero a vector de entrada.
