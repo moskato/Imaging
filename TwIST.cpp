@@ -1,14 +1,11 @@
 void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 {
-	/*
-	 * 
-	 * 
-	 * */
 	
 	int tmy = 1024; //Static size for example :D
 	int tm = 4096;
 
     int stopCriterion = 1;
+    float criterion = 0;
     double tolA = 0.01;
     bool debias = false;
     int maxiter = 10000;
@@ -23,16 +20,23 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
     double alpha = 0;
     double beta = 0;
     
+    float prev_f = 0;
+    float f = 0;
+    
     int sparse = 1;
-    double tolD = 0.001
+    double tolD = 0.001;
+    
     //variable phi_l1 and psi_ok 
     double phi_l1 = 0;
     double psi_ok = 0;
+    
     //Default eigenvalues
     double lam1 = 1e-4;
     double lamN = 1;
+    
     //constants ans internal variables
     double for_ever = 1;
+    
     //maj_max_sv: majorizer for the maximum singular value of operator A
     int max_svd = 1;
 
@@ -43,15 +47,16 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 
     char *str=0;
     int i;
+    
 
     
 
     va_list args;
     va_start(args, arguments);
     
-             /*-----------------------
-                     Optional parameters
-            --------------------------*/
+    /*-----------------------
+            Optional parameters
+    --------------------------*/
     while (true)
     {
         str = va_arg (args,char *);
@@ -136,15 +141,21 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
     //Others 
     
     static float *nz_x=new float[tm];
+    static float *mask=new float[tm];
     static float *nz_x_prev=new float[tm];
+    
     static float *resid=new float[tmy];
+    
+    static float *temp0=new float[tm];
     static float *temp=new float[tm];
     static float *temp1=new float[tm];
     static float *temp2=new float[tm];
     static float *temp3=new float[tm];
     static float *temp4=new float[tmy];
 
-    float objective;
+	//static float *objective=new float[100];
+	float objective;
+    float num_changes_active;
     
     //TwIST Parameters
     double rho0;
@@ -177,37 +188,25 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
     float max_tau;
     max_tau = 0.0;
 
-	/*Implementar las funciones  
-	 * A(x) = R*x
-	 * AT(x) = R'*x
-	 * Psi = hard(x,th) 
-	 * Phi = L0norm     
-	 * Nonzero --> Extract the valuez nonzero in a vector
-	 * sumVector -> Sum the values in a vector
-	 * 
-	 * */
-	 
-	/*
-	
 	 //Define the indicator vector or matrix of nonzeros in x
-	 
-	nz_x = NonZero(x,tm); //Extract the valuez nonzero in a vector
-	num_nz_x = sumVector(nz_x,tm); //Sum the values in a vector
+	float num_nz_x;
+	
+	non_zero(x,tm,nz_x); //Extract the valuez nonzero in a vector
+	num_nz_x = sum(nz_x,tm); //Sum the values in a vector
 	 
 	// Compute and store initial value of the objective function
-	
 	temp = A(x);
-	resid = vector_minus(y, temp, tmy);
-	prev_f = 0.5 * (vector_prod(resid,resid,tmy)) + tau*phi_function(x,tm);
-	//prev_f = 0.5*(resid'*resid) + tau*phi_function(x);
-	
+	vector_res(y, temp, tmy, resid);
+	float c;
+	c = vector_prod(resid,resid,tmy);
+	prev_f = 0.5*c + tau*phi_function(x,tm); //499
 	
 	//Start clock	
-	t0 = clock();
+	//t0 = clock();
 	//times(1) = cputime - t0;
-	objective = prev_f;
+	objective[0] = prev_f;
 	
-	int count_outer = 1;
+	int cont_outer = 1;
 	int iter = 1;
 	
 	// variables controling first and second order iterations
@@ -217,6 +216,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 	// initialize
 	static float *xm2=new float[tm];
     static float *xm1=new float[tm];
+    float c;
 	xm2=x;
 	xm1=x;	
 	
@@ -224,42 +224,43 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 	/*--------------------------------------------------------------
 		TwIST iterations
 	-------------------------------------------------------------*/
-	/*while (cont_outer)
+	while (cont_outer)
 	{
     // gradient
     grad = AT(resid);
 		while (for_ever)
 		{
-			//x = psi_function(xm1 + grad/max_svd,tau/max_svd);
-			for (int i = 0; i < tm ; i++)
+			prod_c_v(grad, (1/max_svd), tm, temp0);
+			vector_sum(xm1, temp0, tm, temp0);
+			psi_function(temp0, tau/max_svd, tm, x);
+			
+			if ((IST_iters >= 2) || ( TwIST_iters != 0))
 			{
-				x[i] = xm1[i] + grad[i]/max_svd;
-			}
-			psi_function(temp1, tau/max_svd); //Devuelve un vector
-			if (IST_iters >= 2) || ( TwIST_iters ~= 0)
-			{
-				// set to zero the past when the present is zero
-				// suitable for sparse inducing priors
+				if (sparse)
+				{	
+					non_zero(x, tm, mask);
+					hadamard(xm1, mask, tm, xm1);
+					hadamard(xm2, mask, tm, xm2);
+				}
 			
 				// two-step iteration
-				temp1 = prod_c_V(xm1,(alpha-beta));
-				temp2 = prod_c_V(xm2,(1-alpha));
-				temp3 = prod_c_V(x,beta);
-				xm2 = vector_sum(temp1,temp2, tmy);
-				xm2 = vector_sum(xm2,temp3, tmy);
+				prod_c_V(xm1,(alpha-beta), tm, temp1);
+				prod_c_V(xm2,(1-alpha), tm, temp2);
+				prod_c_V(x, beta, tm, temp3);
+				vector_sum(temp1,temp2, tm, xm2);
+				vector_sum(xm2,temp3, tmy, xm2);
             
 				// compute residual
 				temp4 = A(xm2)
-				resid = vector_minus(y, temp4, tmy);
-				resid = y - A(x);
+				vector_res(y, temp4, tmy, resid);
 				
-				//f = 0.5*(resid(:)'*resid(:)) + tau*phi_function(xm2);
-				f = 0.5 * (vector_prod(resid,resid,tmy)) + tau*phi_function(xm2,tmy);
+				float c;
+				c = vector_prod(resid,resid,tmy);
+				f = 0.5*c + tau*phi_function(xm2,tm);
 				
-				
-				if (f > prev_f) && (enforceMonotone)
+				if ((f > prev_f) && (enforceMonotone))
 				{
-					TwIST_iters = 0;  // do a IST iteration if monotonocity fails
+					TwIST_iters = 0;  /*! do a IST iteration if monotonocity fails*/
 				}
 				else
 				{
@@ -275,17 +276,14 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 			}	
 			else
 			{
-				//resid = y-A(x);
 				temp4 = A(x)
-				resid = vector_minus(y, temp4, tmy);
+				vector_res(y, temp4, tmy, resid);
 				
-				//f = 0.5*(resid(:)'*resid(:)) + tau*phi_function(x);
-				f = 0.5 * (vector_prod(resid,resid,tmy)) + tau*phi_function(x, x.size());
+				c = vector_prod(resid,resid,tmy);
+				f = 0.5*c + tau*phi_function(x,tm);
+				
 				if (f > prev_f)
 				{
-					/* if monotonicity  fails here  is  because
-					max eig (A'A) > 1. Thus, we increase our guess
-					of max_svs
 					max_svd = 2*max_svd;
 					IST_iters = 0;
 					TwIST_iters = 0;
@@ -297,57 +295,63 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 				}
 			}
 		}
+		//while
+		xm2 = xm1;
+		xm1 = x;        
+       
+		//update the number of nonzero components and its variation
+		nz_x_prev = nz_x;
+		non_zero(x, tm, nz_x);
+		num_nz_x = sum(nz_x, tm);
+		diff(nz_x,nz_x_prev, tm, temp);
+		num_changes_active = sum(temp,tm);
+
+		// take no less than miniter and no more than maxiter iterations
+		switch (stopCriterion)
+		{
+			case 0:
+			{
+				/* compute the stopping criterion based on the change
+				of the number of non-zero components of the estimate*/
+				criterion =  num_changes_active;
+			}
+			case 1:
+			{
+				/* compute the stopping criterion based on the relative
+				variation of the objective function.*/
+				criterion = abs(f-prev_f)/prev_f;
+			}
+			case 2:
+			{
+				/* compute the stopping criterion based on the relative
+				% variation of the estimate.
+				criterion = (norm(x(:)-xm1(:))/norm(x(:)));*/
+			}
+			case 3:
+			{
+				// continue if not yet reached target value tolA
+				criterion = f;
+			}	
+			default:
+			{
+				printf("Stop Criterion Error");
+			}
+		}
+		cont_outer = ((iter <= maxiter) && (criterion > tolA));
+		if (iter <= miniter)
+		{
+			cont_outer = 1;
+		}
+	
+		iter = iter + 1;
+		prev_f = f;
+		objective = f;
+		//times(iter) = cputime - t0;    
+	
 	}
-	//while
-    xm2 = xm1;
-    xm1 = x;        
-       */     
-    //update the number of nonzero components and its variation
-    /*nz_x_prev = nz_x;
-    nz_x = (x~=0.0);
-    num_nz_x = sumVector(nz_x(:));
-    num_change|s_active = (sum(nz_x(:)~=nz_x_prev(:)));*/
-
-    // take no less than miniter and no more than maxiter iterations
-    switch (stopCriterion)
-    {
-        case 0:
-        {
-            /* compute the stopping criterion based on the change
-             of the number of non-zero components of the estimate*/
-            criterion =  num_changes_active;
-		}
-        case 1:
-        {
-            /* compute the stopping criterion based on the relative
-             variation of the objective function.*/
-            criterion = abs(f-prev_f)/prev_f;
-		}
-        case 2:
-        {
-            /* compute the stopping criterion based on the relative
-            % variation of the estimate.
-            criterion = (norm(x(:)-xm1(:))/norm(x(:)));*/
-		}
-        case 3:
-        {
-            % continue if not yet reached target value tolA
-            criterion = f;
-		}
-        default:
-        {
-			printf("Stop Criterion Error");
-        }
-    }
-    /*cont_outer = ((iter <= maxiter) & (criterion > tolA));
-    if iter <= miniter
-    {
-        cont_outer = 1;
-    }
-
-    iter = iter + 1;
-    prev_f = f;
-    objective(iter) = f;
-    times(iter) = cputime - t0;    */
-
+	printf("\nFinished the main algorithm!\nResults:\n");
+    printf("||A x - y ||_2^2 = %8.20f\n",vector_prod(resid,resid,tmy));
+	//cout<<"||x||_1 = "<<mysum(x,1.0,tm,0)<<endl;
+    printf("Objective function = %10.3f\n",f);
+    //printf("Number of non-zero components = %2.0f\n",num_nz_x);
 }
