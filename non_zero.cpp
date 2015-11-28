@@ -13,12 +13,9 @@ void non_zero(float *x, int tm, float *nz_x)
 {
 	for(int i=0;i<tm;i++)
 	{
-		if(*x!=0)
-			*nz_x=1;
+		if(x[i]!=0)
+			nz_x[i]=1;
 		else
-			*nz_x=0;
-		x++;
-		nz_x++;
+			nz_x[i]=0;
 	}
-	//return nz_x;
 }
