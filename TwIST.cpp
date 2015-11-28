@@ -1,4 +1,5 @@
-void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
+void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
+{
 	/*
 	 * 
 	 * 
@@ -223,7 +224,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 	/*--------------------------------------------------------------
 		TwIST iterations
 	-------------------------------------------------------------*/
-	while (cont_outer)
+	/*while (cont_outer)
 	{
     // gradient
     grad = AT(resid);
@@ -234,7 +235,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 			{
 				x[i] = xm1[i] + grad[i]/max_svd;
 			}
-			psi_function(temp1, tau/max_svd);
+			psi_function(temp1, tau/max_svd); //Devuelve un vector
 			if (IST_iters >= 2) || ( TwIST_iters ~= 0)
 			{
 				// set to zero the past when the present is zero
@@ -284,7 +285,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 				{
 					/* if monotonicity  fails here  is  because
 					max eig (A'A) > 1. Thus, we increase our guess
-					of max_svs*/
+					of max_svs
 					max_svd = 2*max_svd;
 					IST_iters = 0;
 					TwIST_iters = 0;
@@ -294,12 +295,13 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 					TwIST_iters = TwIST_iters + 1;
 					break;
 				}
-						
 			}
-	}//while
+		}
+	}
+	//while
     xm2 = xm1;
     xm1 = x;        
-            
+       */     
     //update the number of nonzero components and its variation
     /*nz_x_prev = nz_x;
     nz_x = (x~=0.0);
@@ -326,6 +328,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
             /* compute the stopping criterion based on the relative
             % variation of the estimate.
             criterion = (norm(x(:)-xm1(:))/norm(x(:)));*/
+		}
         case 3:
         {
             % continue if not yet reached target value tolA
@@ -336,7 +339,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
 			printf("Stop Criterion Error");
         }
     }
-    cont_outer = ((iter <= maxiter) & (criterion > tolA));
+    /*cont_outer = ((iter <= maxiter) & (criterion > tolA));
     if iter <= miniter
     {
         cont_outer = 1;
@@ -345,8 +348,6 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...){
     iter = iter + 1;
     prev_f = f;
     objective(iter) = f;
-    times(iter) = cputime - t0;
-	}
-    
+    times(iter) = cputime - t0;    */
+
 }
-	}
