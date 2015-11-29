@@ -5,8 +5,7 @@ CXXFLAGS = -g -Wall
 RM = rm -f
 
 PROJECT = main.exe
-SOURCE = main.cpp 
-#TwiST.cpp AT.cpp non_zero.cpp phi_function.cpp prod_c_V.cpp psi_function.cpp vector_minus.cpp vector_prod.cpp vector_sum.cpp
+SOURCE = main.cpp TwiST.cpp AT.cpp non_zero.cpp phi_function.cpp prod_c_V.cpp psi_function.cpp vector_minus.cpp vector_prod.cpp vector_sum.cpp
 HEADER = functions.h
 OBJS = $(subst .cc,.o,$(SOURCE)))
 
@@ -15,7 +14,7 @@ OBJS = $(subst .cc,.o,$(SOURCE)))
 all: $(PROJECT)
 	
 $(PROJECT):
-	$(CXX) $(HEADER) $(SOURCE) -o $(PROJECT)
+	$(CXX) $(CXXFLAGS) $(HEADER) $(SOURCE) -o $(PROJECT)
 
 clean: 
 	$(RM) $(OBJS)

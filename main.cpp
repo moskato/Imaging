@@ -53,7 +53,7 @@ int main()
 	float tolA = 0.01;
       
     //Llamada al algoritmo de reconstrucción
-    //TwiST(y2,R,tau,reconstruction,6,"TOLERANCEA",1e-12,"MAXITERA",MAXITERA,"VERBOSE",0,"FIN");
+    TwiST(y2,R,tau,reconstruction,6,"TOLERANCEA",1e-12,"MAXITERA",MAXITERA,"VERBOSE",0,"FIN");
 
     /*FILE *pFile;
 

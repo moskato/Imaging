@@ -1,6 +1,6 @@
 /*!
- * Función AT:
- * La función AT realiza la  multiplicación de un vector x 
+ * Función A:
+ * La función A realiza la  multiplicación de un vector x 
  * con una matriz R.
  * 
  * @param x puntero al vector a registrarle los elementos diferentes de cero.
@@ -11,19 +11,19 @@
  * 
  */
 
-void AT(float *y, float **R, int m, int n, float *result)
+void A(float *x, float **R, int m, int n, float *result)
 {
 	float var;
-	int p;
-	for(int i = 0; i < n ; i++)
+	int cont = 0;
+	for(int i = 0; i < m ; i++)
 	{
-		p = 0;
 		var = 0;
-		for(int j = 0; j < m; j++)
+		for(int j = 0; j < n; j++)
 		{
-			var = var + R->matrizA[j][i]*y[p];
-			p++;
+			var = var + R->matrizA[i][j]*x[j];
 		}
 		result[cont] = var;
+		cont++;
 	}
 }
+
