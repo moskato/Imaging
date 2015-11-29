@@ -53,8 +53,9 @@ int main()
 	float tolA = 0.01;
       
     //Llamada al algoritmo de reconstrucción
-    TwiST(y2,R,tau,reconstruction,6,"TOLERANCEA",1e-12,"MAXITERA",MAXITERA,"VERBOSE",0,"FIN");
-
+    twist(y2,R,tau,reconstruction,6,"TOLERANCEA",1e-12,"MAXITERA",MAXITERA,"VERBOSE",0,"FIN");
+	
+	printf("Oh my gosh!");
     /*FILE *pFile;
 
     pFile = fopen ("../cassi/reconstruccion.txt","w");

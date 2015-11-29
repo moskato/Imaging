@@ -1,4 +1,4 @@
-void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
+void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
 {
 	
 	int tmy = 1024; //Static size for example :D
@@ -195,7 +195,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 	num_nz_x = sum(nz_x,tm); //Sum the values in a vector
 	 
 	// Compute and store initial value of the objective function
-	temp = A(x);
+	A(x, R, tm, tmy, temp);
 	vector_res(y, temp, tmy, resid);
 	float c;
 	c = vector_prod(resid,resid,tmy);
@@ -227,7 +227,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 	while (cont_outer)
 	{
     // gradient
-    grad = AT(resid);
+    AT(resid, R, tm, tmy, grad);
 		while (for_ever)
 		{
 			prod_c_v(grad, (1/max_svd), tm, temp0);
@@ -251,7 +251,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 				vector_sum(xm2,temp3, tmy, xm2);
             
 				// compute residual
-				temp4 = A(xm2)
+				A(xm2, R, tm, tmy, temp4);
 				vector_res(y, temp4, tmy, resid);
 				
 				float c;
@@ -276,7 +276,7 @@ void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...)
 			}	
 			else
 			{
-				temp4 = A(x)
+				A(x, R, tm, tmy, temp4);
 				vector_res(y, temp4, tmy, resid);
 				
 				c = vector_prod(resid,resid,tmy);

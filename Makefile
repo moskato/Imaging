@@ -1,11 +1,11 @@
 #Makefile to compile the project
 
 CXX = g++
-CXXFLAGS = -g -Wall
+CXXFLAGS = -g 
 RM = rm -f
 
 PROJECT = main.exe
-SOURCE = main.cpp TwiST.cpp AT.cpp non_zero.cpp phi_function.cpp prod_c_V.cpp psi_function.cpp vector_minus.cpp vector_prod.cpp vector_sum.cpp
+SOURCE = main.cpp twist.cpp AT.cpp A.cpp diff.cpp hadamard.cpp non_zero.cpp phi_function.cpp prod_c_v.cpp psi_function.cpp sum.cpp vector_res.cpp vector_prod.cpp vector_sum.cpp
 HEADER = functions.h
 OBJS = $(subst .cc,.o,$(SOURCE)))
 

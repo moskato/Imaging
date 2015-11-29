@@ -28,7 +28,7 @@ float phi_function(float *x, int tm);
 void prod_c_v(float *x, float sc, int tm, float *z);
 void psi_function(float *x, float lambda, int tm, float *z);
 float sum(float *x, int tm);
-void TwIST(double *y,const object *A, double tau,double *&x,int arguments, ...);
+void twist(double *y,const object *A, double tau,double *&x,int arguments, ...);
 float vector_prod(float *x, float *y, int tm);
 void vector_res(float *x, float *y, int tm, float *z);
 void vector_sum(float *x, float *y, int tm, float *z);
