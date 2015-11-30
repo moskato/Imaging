@@ -18,28 +18,30 @@
 #include <time.h>		/* time */
 #include <stdlib.h>		/*srand, rand*/
 #include <math.h>  
+#include <stdarg.h>
+#include <string.h>
 
 typedef struct Matrix{ 
-    float **matrixA;
+    double **matrixA;
     size_t m;
     size_t n;
 }obj;
 
 using namespace std;
 
-void Af(float *x, float **R, int m, int n, float *result);
-void AT(float *y, float **R, int m, int n, float *result);
-void diff(float *x, float *y, int tm, float *temp);
-void hadamard(float *x, float *y, int tm, float *z);
-void non_zero(float *x, int tm, float *nz_x);
-float phi_function(float *x, int tm);
-void prod_c_v(float *x, float sc, int tm, float *z);
-void psi_function(float *x, float lambda, int tm, float *z);
-float sum(float *x, int tm);
-void twist(float *y,matrixA *A, double tau,float *&x,int arguments, ...);
-float vector_prod(float *x, float *y, int tm);
-void vector_res(float *x, float *y, int tm, float *z);
-void vector_sum(float *x, float *y, int tm, float *z);
+void Af(double *x, obj *A, int m, int n, double *result);
+void AT(double *y, obj *A, int m, int n, double *result);
+void diff(double *x, double *y, int tm, double *temp);
+void hadamard(double *x, double *y, int tm, double *z);
+void non_zero(double *x, int tm, double *nz_x);
+double phi_function(double *x, int tm);
+void prod_c_v(double *x, double sc, int tm, double *z);
+void psi_function(double *x, double lambda, int tm, double *z);
+double sum(double *x, int tm);
+void twist(double *y,obj *A, double tau,double *x,int arguments, ...);
+double vector_prod(double *x, double *y, int tm);
+void vector_res(double *x, double *y, int tm, double *z);
+void vector_sum(double *x, double *y, int tm, double *z);
 
 
 
