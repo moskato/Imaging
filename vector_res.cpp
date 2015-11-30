@@ -8,7 +8,7 @@
  * @param z puntero a vector resultado de la resta de x y y.
  * 
  */
-void vector_res(float *x, float *y, int tm, float *z)
+void vector_res(double *x, double *y, int tm, double *z)
 {
 	for(int i=0;i<tm;i++)
 		z[i]=x[i]-y[i];
