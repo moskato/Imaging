@@ -8,9 +8,9 @@
  * @return elemento de salida de la suma del vector de entrada
  * 
  */
-float sum(float *x, int tm)
+double sum(double *x, int tm)
 {
-	float sum_z = 0;
+	double sum_z = 0;
 	for(int i=0;i<tm;i++)
 		sum_z = sum_z + x[i];
 	return sum_z;

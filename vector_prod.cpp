@@ -8,9 +8,9 @@
  * @return valor producto vectores de entrada.
  * 
  */
-float vector_prod(float *x, float *y, int tm)
+double vector_prod(double *x, double *y, int tm)
 {
-	float z=0;
+	double z=0;
 	for(int i=0;i<tm;i++)
 	{
 		z+=(x[i])*(y[i]);

@@ -9,7 +9,7 @@
  * 
  */
 
-void non_zero(float *x, int tm, float *nz_x)
+void non_zero(double *x, int tm, double *nz_x)
 {
 	for(int i=0;i<tm;i++)
 	{
