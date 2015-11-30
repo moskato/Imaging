@@ -1,3 +1,4 @@
+#include "functions.h"
 /*!
  * Función Af:
  * La función Af realiza la  multiplicación de un vector x 
@@ -11,18 +12,18 @@
  * 
  */
 
-void Af(float *x, matrix_A *&matrixA, int m, int n, float *result)
+void Af(double *x, obj *A, int m, int n, double *result)
 {
-	float var;
+	int var;
 	int cont = 0;
-	for(int i = 0; i < m ; i++)
+	for(int i = 0; i < A->m ; i++)
 	{
-		var = 0;
-		for(int j = 0; j < n; j++)
+		var = 0.0;
+		for(int j = 0; j < A->n; j++)
 		{
-			var = var + matrixA[i][j]*x[j];
+			var = var + A->matrixA[i][j]*x[j];
 		}
-		result[cont] = var;
+		result[i] = var;
 		cont++;
 	}
 }
