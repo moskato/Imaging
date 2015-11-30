@@ -5,13 +5,11 @@ Recibe un vector de medidas de una imagen hiperespectral
 */
 int main()
 {
-    twist *result = new twist;
     int tmy = 1024;
     int tm = 256;
     static float *reconstruction  = new float[tm];  
     static float *y2= new float[tmy];
-    
-    matriz_A *R = new matriz_A;
+    static obj *R = new obj;
     R ->m = ROWS;
     R ->n = COLS;     
     
@@ -19,6 +17,7 @@ int main()
     
     //Crear Matrix R
 	R->matrixA = new float*[R->m];
+	
 	srand((unsigned)time(0));
     for (i = 0; i < COLS; i++) 
     {
@@ -43,19 +42,15 @@ int main()
 			//printf("This is the line = %10.3f\n", output);
         }
     }
-    myfile.close();  
-    //printf("Hello World");
-    
-    
+    myfile.close();      
     
     //Parámetros
-    int tau = 20;
+    double tau = 20;
 	float tolA = 0.01;
       
     //Llamada al algoritmo de reconstrucción
-    twist(y2,R,tau,reconstruction,6,"TOLERANCEA",1e-12,"MAXITERA",MAXITERA,"VERBOSE",0,"FIN");
-	
-	printf("Oh my gosh!");
+    twist(y2,R->matrizA,tau,reconstruction,6,"TOLERANCEA",1e-12,"MAXITERA",MAXITERA);
+
     /*FILE *pFile;
 
     pFile = fopen ("../cassi/reconstruccion.txt","w");

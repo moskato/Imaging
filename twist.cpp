@@ -1,4 +1,6 @@
-void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
+#include "functions.h"
+
+void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 {
 	
 	int tmy = 1024; //Static size for example :D
@@ -7,7 +9,6 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
     int stopCriterion = 1;
     float criterion = 0;
     double tolA = 0.01;
-    bool debias = false;
     int maxiter = 10000;
     int maxiter_debias = 200;
     int miniter = 5;
@@ -40,15 +41,10 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
     //maj_max_sv: majorizer for the maximum singular value of operator A
     int max_svd = 1;
 
-    //Set the defaults for outputs that may not be computed
-    int debias_start = 0;
-    double x_debias = [];
-    double mses = [];
 
     char *str=0;
     int i;
     
-
     
 
     va_list args;
@@ -72,9 +68,6 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
             beta = va_arg (args, double);
             cout <<"Beta: "<< beta << '\n';
         }
-        //-------
-        //Add Psi and Phi Varargin (Check dependencies) ----------------------------------------------------Check
-        //-------
         else if ( strcmp(str,"STOPCRITERION")==0){
             stopCriterion = va_arg (args, int);
             cout << "Stop criterion: "<<stopCriterion << '\n';
@@ -110,7 +103,6 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
         else if(strcmp(str,"INITIALIZATION")==0){
             init=va_arg (args, int);
             cout<<"Init: "<<init<<endl;
-            //Inizialization have an "If" ---> Check O_O ------------------------------------------------Check
         }
         else if(strcmp(str,"MONOTONE")==0){
             enforceMonotone = va_arg (args, int);
@@ -156,13 +148,14 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
 	//static float *objective=new float[100];
 	float objective;
     float num_changes_active;
+    float c;
     
     //TwIST Parameters
     double rho0;
     rho0 = (1 - lam1/lamN)/(1 + lam1/lamN);
     if (alpha == 0)
     {
-        alpha = 2/(1+sqrt(1-rho0^2));
+        alpha = 2/(1+sqrt(1-(rho0^2)));
     }
     if (beta == 0)
     {
@@ -195,16 +188,16 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
 	num_nz_x = sum(nz_x,tm); //Sum the values in a vector
 	 
 	// Compute and store initial value of the objective function
-	A(x, R, tm, tmy, temp);
+	Af(x, A, tm, tmy, temp);
 	vector_res(y, temp, tmy, resid);
-	float c;
+	
 	c = vector_prod(resid,resid,tmy);
 	prev_f = 0.5*c + tau*phi_function(x,tm); //499
 	
 	//Start clock	
 	//t0 = clock();
 	//times(1) = cputime - t0;
-	objective[0] = prev_f;
+	objective = prev_f;
 	
 	int cont_outer = 1;
 	int iter = 1;
@@ -216,7 +209,7 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
 	// initialize
 	static float *xm2=new float[tm];
     static float *xm1=new float[tm];
-    float c;
+    
 	xm2=x;
 	xm1=x;	
 	
@@ -227,7 +220,7 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
 	while (cont_outer)
 	{
     // gradient
-    AT(resid, R, tm, tmy, grad);
+    AT(resid, A, tm, tmy, grad);
 		while (for_ever)
 		{
 			prod_c_v(grad, (1/max_svd), tm, temp0);
@@ -251,10 +244,10 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
 				vector_sum(xm2,temp3, tmy, xm2);
             
 				// compute residual
-				A(xm2, R, tm, tmy, temp4);
+				Af(xm2, A, tm, tmy, temp4);
 				vector_res(y, temp4, tmy, resid);
 				
-				float c;
+				
 				c = vector_prod(resid,resid,tmy);
 				f = 0.5*c + tau*phi_function(xm2,tm);
 				
@@ -276,7 +269,7 @@ void twist(double *y,const object *A, double tau,double *&x,int arguments, ...)
 			}	
 			else
 			{
-				A(x, R, tm, tmy, temp4);
+				Af(x, A, tm, tmy, temp4);
 				vector_res(y, temp4, tmy, resid);
 				
 				c = vector_prod(resid,resid,tmy);

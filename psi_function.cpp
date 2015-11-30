@@ -1,3 +1,4 @@
+#include "functions.h"
 /*!
  * Función psi_function:
  * Se hace un umbral para cada valor del vector de entrada dependiendo del 
