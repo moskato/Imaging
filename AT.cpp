@@ -1,3 +1,5 @@
+
+#include "functions.h"
 /*!
  * Función AT:
  * La función AT realiza la  multiplicación de un vector x 
@@ -11,21 +13,26 @@
  * 
  */
 
-void AT(float *y, matrix_A *&matrixA, int m, int n, float *result)
+void AT(double *y, obj *A, int m, int n, double *result)
 {
-	float var;
+	int var;
 	int p;
 	int cont = 0;
-	for(int i = 0; i < n ; i++)
+	for(int i = 0; i < A->n ; i++)
 	{
 		p = 0;
 		var = 0;
-		for(int j = 0; j < m; j++)
+		for(int j = 0; j < A->m; j++)
 		{
-			var = var + matrixA[j][i]*y[p];
+			var = var + A->matrixA[j][i]*y[j];
+			/*if (i == 1024)
+			{
+				cout<<"var= "<<var<<"\n A ="<<A->matrixA[j][i]<<", y[j]"<<y[j]<<"\n"<<endl;
+			}*/
 			p++;
 		}
-		result[cont] = var;
+		
+		result[i] = var;
 		cont++;
 	}
 }
