@@ -10,13 +10,13 @@
  * 
  */
 
-void psi_function(float *x, float lambda, int tm, float *z)
+void psi_function(double *x, double lambda, int tm, double *z)
 {
 	int i,j;
 	for (i = 0; i < tm; i++)
 	{
 		
-		if(x[i] >= sqrt(2*lambda))
+		if(abs(x[i]) >= sqrt(2*lambda))
 		{
 			z[i] = x[i];			
 		}

@@ -8,7 +8,7 @@
  * @param z puntero a vector resultado del producto de x y sc.
  * 
  */
-void prod_c_v(float *x, float sc, int tm, float *z)
+void prod_c_v(double *x, double sc, int tm, double *z)
 {
 	for(int i=0;i<tm;i++)
 		z[i]=sc*x[i];

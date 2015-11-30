@@ -8,10 +8,10 @@
  * 
  */
 
-float phi_function(float *x, int tm)
+double phi_function(double *x, int tm)
 {
     int i;
-    float z = 0;
+    double z = 0;
     for(i=0; i < tm; i++)
     {
 		if (x[i] != 0)

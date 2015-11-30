@@ -1,13 +1,15 @@
 #include "functions.h"
 
-void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
+void twist(double *y,obj *A, double tau,double *x,int arguments, ...)
 {
 	
-	int tmy = 1024; //Static size for example :D
-	int tm = 4096;
+	//int tmy = 1024; //Static size for example :D
+	//int tm = 4096;
+	int tm = A->n;
+	int tmy = A->m;
 
     int stopCriterion = 1;
-    float criterion = 0;
+    double criterion = 0;
     double tolA = 0.01;
     int maxiter = 10000;
     int maxiter_debias = 200;
@@ -21,8 +23,8 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
     double alpha = 0;
     double beta = 0;
     
-    float prev_f = 0;
-    float f = 0;
+    double prev_f = 0;
+    double f = 0;
     
     int sparse = 1;
     double tolD = 0.001;
@@ -56,11 +58,7 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
     while (true)
     {
         str = va_arg (args,char *);
-        if ( strcmp(str,"LAMBDA")==0){
-            lam1 = va_arg (args, double);
-            cout << "Lambda: "<<lam1 << '\n';            
-        }
-        else if (strcmp(str,"ALPHA")==0){
+		if (strcmp(str,"ALPHA")==0){
             alpha = va_arg (args, double);
             cout <<"Alpha: "<< alpha << '\n';
         }
@@ -79,10 +77,6 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
         else if(strcmp(str,"TOLERANCED")==0){
             tolD = va_arg (args, double);
             cout << "Toleranced: "<<tolD << '\n';
-        }
-        else if(strcmp(str,"DEBIAS")==0){
-            debias = va_arg (args, bool);
-            cout << "Debias: "<<debias << '\n';
         }
         else if(strcmp(str,"MAXITERA")==0){
             maxiter = va_arg (args, int);
@@ -112,50 +106,43 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
             sparse = va_arg (args, int);
             cout <<"Sparse: "<< sparse << '\n';
         }
-        else if(strcmp(str,"TRUE_X")==0){
-            compute_mse = true;
-            va_arg (args, bool);
-        }
-        else if(strcmp(str,"AT")==0){
-            AT = va_arg (args, int);
-            cout <<"AT: "<< AT << '\n';
-        }        
-        else if(strcmp(str,"VERBOSE")==0){
-            verbose = va_arg (args, int);
-            cout <<"Verbose: "<< verbose << '\n';
-        }
         else{
             break;
         }
     }
     va_end (args);
     
+    cout << "Stop criterion: "<<stopCriterion << '\n';
     //Others 
     
-    static float *nz_x=new float[tm];
-    static float *mask=new float[tm];
-    static float *nz_x_prev=new float[tm];
+    static double *nz_x=new double[tm];
+    static double *mask=new double[tm];
+    static double *nz_x_prev=new double[tm]; //e
     
-    static float *resid=new float[tmy];
+    static double *resid=new double[tmy];
+    static double *grad=new double[tm];
     
-    static float *temp0=new float[tm];
-    static float *temp=new float[tm];
-    static float *temp1=new float[tm];
-    static float *temp2=new float[tm];
-    static float *temp3=new float[tm];
-    static float *temp4=new float[tmy];
+    static double *temp0=new double[tm];
+    static double *temp=new double[tm];
+    static double *temp1=new double[tm];
+    static double *temp2=new double[tm];
+    static double *temp3=new double[tm];
+    static double *temp4=new double[tmy];
+    // initialize
+	static double *xm2=new double[tm]; //e
+    static double *xm1=new double[tm]; //e
 
-	//static float *objective=new float[100];
-	float objective;
-    float num_changes_active;
-    float c;
+	//static double *objective=new double[100];
+	double objective;
+    double num_changes_active;
+    double c;
     
     //TwIST Parameters
     double rho0;
     rho0 = (1 - lam1/lamN)/(1 + lam1/lamN);
     if (alpha == 0)
     {
-        alpha = 2/(1+sqrt(1-(rho0^2)));
+        alpha = 2/(1+sqrt(1-(rho0*rho0)));
     }
     if (beta == 0)
     {
@@ -167,7 +154,7 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
     {
     case 0: 
     {
-        x = new float[tm];
+        x = new double[tm];
 
         for(i=0;i<tm;i++){
             x[i]=0.0;
@@ -178,11 +165,11 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 	}
     
     
-    float max_tau;
+    double max_tau;
     max_tau = 0.0;
 
 	 //Define the indicator vector or matrix of nonzeros in x
-	float num_nz_x;
+	double num_nz_x;
 	
 	non_zero(x,tm,nz_x); //Extract the valuez nonzero in a vector
 	num_nz_x = sum(nz_x,tm); //Sum the values in a vector
@@ -206,13 +193,11 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 	int IST_iters = 0;
 	int TwIST_iters = 0;
 
-	// initialize
-	static float *xm2=new float[tm];
-    static float *xm1=new float[tm];
+
     
 	xm2=x;
 	xm1=x;	
-	
+	int k=0;
 	
 	/*--------------------------------------------------------------
 		TwIST iterations
@@ -221,12 +206,20 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 	{
     // gradient
     AT(resid, A, tm, tmy, grad);
+	/*if (k == 0)
+	{
+		for (i = 0; i < tm; i++)
+		{
+			cout<<"grad= "<<grad[i]<<", i ="<<i<<"\n"<<endl;
+		}
+			k=1;
+	}*/
 		while (for_ever)
 		{
 			prod_c_v(grad, (1/max_svd), tm, temp0);
 			vector_sum(xm1, temp0, tm, temp0);
 			psi_function(temp0, tau/max_svd, tm, x);
-			
+
 			if ((IST_iters >= 2) || ( TwIST_iters != 0))
 			{
 				if (sparse)
@@ -237,11 +230,11 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 				}
 			
 				// two-step iteration
-				prod_c_V(xm1,(alpha-beta), tm, temp1);
-				prod_c_V(xm2,(1-alpha), tm, temp2);
-				prod_c_V(x, beta, tm, temp3);
+				prod_c_v(xm1,(alpha-beta), tm, temp1);
+				prod_c_v(xm2,(1-alpha), tm, temp2);
+				prod_c_v(x, beta, tm, temp3);
 				vector_sum(temp1,temp2, tm, xm2);
-				vector_sum(xm2,temp3, tmy, xm2);
+				vector_sum(xm2,temp3, tm, xm2);
             
 				// compute residual
 				Af(xm2, A, tm, tmy, temp4);
@@ -260,7 +253,7 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 					TwIST_iters = TwIST_iters+1; // TwIST iterations
 					IST_iters = 0;
 					x = xm2;
-					if (TwIST_iters % 10000) == 0
+					if ((TwIST_iters % 10000) == 0)
 					{
 						max_svd = 0.9*max_svd;
 					}
@@ -286,7 +279,11 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 					TwIST_iters = TwIST_iters + 1;
 					break;
 				}
-			}
+			}/*
+			for (i = 0; i < tm; i++)
+			{			
+				cout<<"x= "<<x[i]<<"\n"<<endl;
+			} */
 		}
 		//while
 		xm2 = xm1;
@@ -298,38 +295,31 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 		num_nz_x = sum(nz_x, tm);
 		diff(nz_x,nz_x_prev, tm, temp);
 		num_changes_active = sum(temp,tm);
-
 		// take no less than miniter and no more than maxiter iterations
-		switch (stopCriterion)
+		criterion = abs(f-prev_f)/prev_f;
+		/*
+		 * switch(stopCriterion)
 		{
 			case 0:
 			{
 				/* compute the stopping criterion based on the change
 				of the number of non-zero components of the estimate*/
-				criterion =  num_changes_active;
+		/*		criterion =  num_changes_active;
 			}
 			case 1:
 			{
 				/* compute the stopping criterion based on the relative
 				variation of the objective function.*/
-				criterion = abs(f-prev_f)/prev_f;
-			}
-			case 2:
-			{
-				/* compute the stopping criterion based on the relative
-				% variation of the estimate.
-				criterion = (norm(x(:)-xm1(:))/norm(x(:)));*/
-			}
-			case 3:
-			{
-				// continue if not yet reached target value tolA
-				criterion = f;
+		/*		criterion = abs(f-prev_f)/prev_f;
+				//printf("Stop Criterion Error \n");
+
 			}	
 			default:
 			{
-				printf("Stop Criterion Error");
+				printf("Stop Criterion Error \n");
 			}
 		}
+		*/
 		cont_outer = ((iter <= maxiter) && (criterion > tolA));
 		if (iter <= miniter)
 		{
@@ -339,7 +329,8 @@ void twist(float *y,matrizA *A, double tau,float *&x,int arguments, ...)
 		iter = iter + 1;
 		prev_f = f;
 		objective = f;
-		//times(iter) = cputime - t0;    
+		//times(iter) = cputime - t0; 
+  
 	
 	}
 	printf("\nFinished the main algorithm!\nResults:\n");
