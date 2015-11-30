@@ -9,7 +9,7 @@
  * 
  */
 
-void diff(float *x, float *y, int tm, float *temp)
+void diff(double *x, double *y, int tm, double *temp)
 {
 	for(int i=0;i<tm;i++)
 	{
