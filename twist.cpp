@@ -1,5 +1,18 @@
 #include "functions.h"
-
+/*!
+ * El algoritmo "Two-step Iterative Shrinkage/Thresholding" (TwIST) es un algoritmo para resolver problemas lineales inversos.
+ * Este algoritmo resuelve el siguiente problema de regularización:
+ * arg min_x = 0.5*|| y - A x ||_2^2 + tau phi( x)
+ * donde A es una matriz genérica y phi() es una función de regularización, tal que la solución del problema de eliminación de ruido es conocida:
+ * Psi_tau(y) = arg min_x = 0.5*|| y - x ||_2^2 + tau \phi( x )
+ * Toda la información relacionada a este algoritmo puede ser encontrada en:http://www.lx.it.pt/~bioucas/TwIST/TwIST.htm.
+ *
+ * @param y puntero al vector de medidas.
+ * @param A objeto que contiene la matriz A y sus tamaños.
+ * @param tau constante de regularización.
+ * @param x representación de y en el dominio de la matriz A.
+ *
+*/
 void twist(double *y,obj *A, double tau,double *x,int arguments, ...)
 {
 	
